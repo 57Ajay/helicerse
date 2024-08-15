@@ -91,3 +91,48 @@ export const updateTimetable = asyncHandler(async (req, res) => {
 });
 
 
+export const getAllTimetables = asyncHandler(async(req, res)=>{
+    try {
+        const loggedInUser = req.user;
+        if (loggedInUser.role !== "Principal" && loggedInUser.role !== "Teacher"){
+            throw new ApiError("You are not authorized to perform this action", 404);
+        };
+        const timetables = await Timetable.find().populate({
+            path: 'classroom',
+            select: 'name _id'
+        });
+        return res.status(200).json(
+            new ApiResponse("Timetables fetched successfully", {
+                timetables
+            }, 200)
+        );
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500)
+    }
+});
+
+export const getTimetableById = asyncHandler(async(req, res)=>{
+    try {
+        const loggedInUser = req.user;
+        if (loggedInUser.role !== "Principal" && loggedInUser.role !== "Teacher"){
+            throw new ApiError("You are not authorized to perform this action", 404);
+        };
+        const { timetableId } = req.params;
+        if (!timetableId) {
+            throw new ApiError("timetableId is required", 400)
+        };
+        const timetable = await Timetable.findById(timetableId).populate({
+            path: 'classroom',
+            select: 'name _id'
+        });
+        return res.status(200).json(
+            new ApiResponse("Timetable fetched successfully", {
+                timetable
+            }, 200)
+        );
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500)
+    }
+});
