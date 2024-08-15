@@ -56,6 +56,7 @@ var asyncHandler_1 = __importDefault(require("../utils/asyncHandler"));
 var apiError_1 = __importDefault(require("../utils/apiError"));
 var apiResponse_1 = __importDefault(require("../utils/apiResponse"));
 var user_model_1 = __importDefault(require("../models/user.model"));
+var bcrypt_1 = __importDefault(require("bcrypt"));
 exports.createClassroom = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var loggedInUser, _a, name_1, startTime, endTime, days, teacherId, teacher, classroom, error_1;
     return __generator(this, function (_b) {
@@ -152,36 +153,49 @@ exports.assignStudentToClassroom = (0, asyncHandler_1.default)(function (req, re
     });
 }); });
 exports.updateUser = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var loggedInUser, _a, userId, email, password, user, error_3;
+    var loggedInUser, _a, userId, email, password, hashedPassword, updateData, user, error_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
+                _b.trys.push([0, 4, , 5]);
                 loggedInUser = req.user;
                 if (loggedInUser.role !== "Principal") {
                     throw new apiError_1.default("You are not authorized to perform this action", 404);
                 }
-                ;
                 _a = req.body, userId = _a.userId, email = _a.email, password = _a.password;
-                if (!email || !password) {
-                    throw new apiError_1.default("All fields are required", 400);
+                if (!userId) {
+                    throw new apiError_1.default("userId is required", 400);
                 }
-                ;
-                return [4 /*yield*/, user_model_1.default.findByIdAndUpdate(userId, { email: email, password: password }, { new: true })];
+                if (!email && !password) {
+                    throw new apiError_1.default("email or password, any one is required", 400);
+                }
+                hashedPassword = void 0;
+                if (!password) return [3 /*break*/, 2];
+                return [4 /*yield*/, bcrypt_1.default.hash(password, 10)];
             case 1:
+                hashedPassword = _b.sent();
+                _b.label = 2;
+            case 2:
+                updateData = { email: email };
+                if (hashedPassword) {
+                    updateData.password = hashedPassword;
+                }
+                return [4 /*yield*/, user_model_1.default.findByIdAndUpdate(userId, updateData, { new: true })];
+            case 3:
                 user = _b.sent();
                 if (!user) {
                     throw new apiError_1.default("User not found", 404);
                 }
-                ;
                 return [2 /*return*/, res.status(200).json(new apiResponse_1.default("User updated successfully", {
-                        user: user
+                        email: user.email,
+                        role: user.role,
+                        _id: user._id
                     }, 200))];
-            case 2:
+            case 4:
                 error_3 = _b.sent();
                 console.log(error_3.message);
                 throw new apiError_1.default("Something went wrong", 500);
-            case 3: return [2 /*return*/];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
@@ -209,7 +223,13 @@ exports.updateClassroom = (0, asyncHandler_1.default)(function (req, res) { retu
                 }
                 ;
                 return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classroom updated successfully", {
-                        classroom: classroom
+                        _id: classroom._id,
+                        name: classroom.name,
+                        startTime: classroom.startTime,
+                        endTime: classroom.endTime,
+                        days: classroom.days,
+                        teacher: classroom.teacher,
+                        students: classroom.students
                     }, 200))];
             case 2:
                 error_4 = _a.sent();
@@ -241,9 +261,7 @@ exports.deleteUser = (0, asyncHandler_1.default)(function (req, res) { return __
                 if (!user) {
                     throw new apiError_1.default("User not found", 404);
                 }
-                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("User deleted successfully", {
-                        user: user,
-                    }, 200))];
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("User deleted successfully", null, 200))];
             case 2:
                 error_5 = _a.sent();
                 console.log(error_5.message);
@@ -277,9 +295,7 @@ exports.deleteClassroom = (0, asyncHandler_1.default)(function (req, res) { retu
                     throw new apiError_1.default("Classroom not found", 404);
                 }
                 ;
-                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classroom deleted successfully", {
-                        classroom: classroom,
-                    }, 200))];
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classroom deleted successfully", null, 200))];
             case 2:
                 error_6 = _a.sent();
                 console.log(error_6.message);

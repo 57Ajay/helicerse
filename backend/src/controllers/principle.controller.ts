@@ -3,6 +3,8 @@ import asyncHandler from "../utils/asyncHandler";
 import ApiError from "../utils/apiError";
 import ApiResponse from "../utils/apiResponse";
 import User from "../models/user.model";
+import bcrypt from 'bcrypt';
+import { IUser } from "../models/user.model";
 
 export const createClassroom = asyncHandler(async(req, res)=>{
    try {
@@ -81,32 +83,49 @@ export const assignStudentToClassroom = asyncHandler(async(req, res)=>{
    }
 });
 
-export const updateUser = asyncHandler(async(req, res)=>{
+export const updateUser = asyncHandler(async (req, res) => {
     try {
         const loggedInUser = req.user;
-        if (loggedInUser.role !== "Principal"){
+        if (loggedInUser.role !== "Principal") {
             throw new ApiError("You are not authorized to perform this action", 404);
-        }; 
-    
+        }
+
         const { userId, email, password } = req.body;
-        if (!email || !password) {
-            throw new ApiError("All fields are required", 400)
-        };
-    
-        const user = await User.findByIdAndUpdate(userId, { email, password }, { new: true });
+        if (!userId) {
+            throw new ApiError("userId is required", 400);
+        }
+        if (!email && !password) {
+            throw new ApiError("email or password, any one is required", 400);
+        }
+
+        let hashedPassword: string | undefined;
+        if (password) {
+            hashedPassword = await bcrypt.hash(password, 10);
+        }
+
+        const updateData: Partial<IUser> = { email };
+        if (hashedPassword) {
+            updateData.password = hashedPassword;
+        }
+
+        const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
         if (!user) {
             throw new ApiError("User not found", 404);
-        };
-    
+        }
+
         return res.status(200).json(
             new ApiResponse("User updated successfully", {
-                user
-            }, 200));
+                email: user.email,
+                role: user.role,
+                _id: user._id
+            }, 200)
+        );
     } catch (error) {
         console.log(error.message);
-        throw new ApiError("Something went wrong", 500)
+        throw new ApiError("Something went wrong", 500);
     }
 });
+
 
 export const updateClassroom = asyncHandler(async(req, res)=>{
     try {
@@ -127,7 +146,13 @@ export const updateClassroom = asyncHandler(async(req, res)=>{
     
         return res.status(200).json(
             new ApiResponse("Classroom updated successfully", {
-                classroom
+                _id: classroom._id,
+                name: classroom.name,
+                startTime: classroom.startTime,
+                endTime: classroom.endTime,
+                days: classroom.days,
+                teacher: classroom.teacher,
+                students: classroom.students
             }, 200));
     } catch (error) {
         console.log(error.message);
@@ -155,9 +180,7 @@ export const deleteUser = asyncHandler(async(req, res)=>{
         }
         
         return res.status(200).json(
-            new ApiResponse("User deleted successfully", {
-                user,
-            }, 200));
+            new ApiResponse("User deleted successfully", null, 200));
     } catch (error) {
         console.log(error.message);
         throw new ApiError("Something went wrong", 500)
@@ -183,9 +206,7 @@ export const deleteClassroom = asyncHandler(async(req, res)=>{
         };
 
         return res.status(200).json(
-            new ApiResponse("Classroom deleted successfully", {
-                classroom,
-            }, 200));
+            new ApiResponse("Classroom deleted successfully", null , 200));
     } catch (error) {
         console.log(error.message);
         throw new ApiError("Something went wrong", 500)
