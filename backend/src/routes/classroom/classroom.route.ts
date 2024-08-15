@@ -1,5 +1,5 @@
 import Router from "express";
-import { createClassroom, assignStudentToClassroom, updateClassroom, deleteClassroom } from "../../controllers/principle.controller";
+import { createClassroom, assignStudentToClassroom, updateClassroom, deleteClassroom } from "../../controllers/classroom.controller";
 import verifyToken from "../../middlewares/verifyAuth.middleware";
 
 const classroomRouter = Router();

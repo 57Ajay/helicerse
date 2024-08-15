@@ -10,6 +10,7 @@ var body_parser_1 = __importDefault(require("body-parser"));
 var auth_route_1 = __importDefault(require("./routes/auth/auth.route"));
 var classroom_route_1 = __importDefault(require("./routes/classroom/classroom.route"));
 var user_route_1 = __importDefault(require("./routes/user/user.route"));
+var timetable_route_1 = __importDefault(require("./routes/timetable/timetable.route"));
 var app = (0, express_1.default)();
 exports.app = app;
 app.use(body_parser_1.default.json());
@@ -23,4 +24,6 @@ app.use("/api/auth", auth_route_1.default);
 app.use("/api/classroom", classroom_route_1.default);
 // User router
 app.use("/api/user", user_route_1.default);
+// TimeTable router
+app.use("/api/timetable", timetable_route_1.default);
 //# sourceMappingURL=app.js.map
