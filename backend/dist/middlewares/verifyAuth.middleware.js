@@ -44,7 +44,6 @@ var dotenv_1 = require("dotenv");
 var apiError_1 = __importDefault(require("../utils/apiError"));
 var user_model_1 = __importDefault(require("../models/user.model"));
 (0, dotenv_1.config)();
-;
 var verifyToken = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var token, decodedToken, user, error_1;
     var _a, _b;
@@ -53,23 +52,24 @@ var verifyToken = function (req, res, next) { return __awaiter(void 0, void 0, v
             case 0:
                 _c.trys.push([0, 2, , 3]);
                 token = ((_a = req.cookies) === null || _a === void 0 ? void 0 : _a.accessToken) || ((_b = req.header("Authorization")) === null || _b === void 0 ? void 0 : _b.replace("Bearer ", ""));
-                // console.log(token);
                 if (!token) {
                     throw new apiError_1.default("Unauthorized - No token provided", 401);
                 }
-                ;
                 if (!process.env.ACCESS_TOKEN_SECRET) {
                     throw new apiError_1.default("Internal Server Error - Token secret is not defined", 500);
                 }
-                ;
                 decodedToken = jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET);
-                return [4 /*yield*/, user_model_1.default.findById(decodedToken === null || decodedToken === void 0 ? void 0 : decodedToken._id).select("-password")];
+                return [4 /*yield*/, user_model_1.default.findById(decodedToken._id).select("-password")];
             case 1:
                 user = _c.sent();
                 if (!user) {
                     throw new apiError_1.default("Unauthorized - User not found", 401);
                 }
-                req.user = user;
+                req.user = {
+                    _id: user._id.toString(), // Convert ObjectId to string
+                    email: user.email,
+                    role: user.role,
+                };
                 next();
                 return [3 /*break*/, 3];
             case 2:
@@ -77,11 +77,14 @@ var verifyToken = function (req, res, next) { return __awaiter(void 0, void 0, v
                 if (error_1 instanceof jsonwebtoken_1.default.JsonWebTokenError) {
                     next(new apiError_1.default("Unauthorized - Invalid token", 401));
                 }
+                else if (error_1.name === 'TokenExpiredError') {
+                    next(new apiError_1.default("Unauthorized - Token expired", 401));
+                }
                 else if (error_1 instanceof apiError_1.default) {
                     next(error_1);
                 }
                 else {
-                    next(new apiError_1.default(error_1.message || "Internal Server Error", error_1.status || 500));
+                    next(new apiError_1.default("Internal Server Error", 500));
                 }
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
