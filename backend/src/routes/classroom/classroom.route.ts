@@ -1,10 +1,12 @@
 import Router from "express";
-import { createClassroom, assignStudentToClassroom } from "../../controllers/principle.controller";
+import { createClassroom, assignStudentToClassroom, updateClassroom, deleteClassroom } from "../../controllers/principle.controller";
 import verifyToken from "../../middlewares/verifyAuth.middleware";
 
-const classRoom = Router();
+const classroomRouter = Router();
 
-classRoom.post("/create", verifyToken, createClassroom);
-classRoom.post("/assign-student", verifyToken, assignStudentToClassroom);
+classroomRouter.post("/create", verifyToken, createClassroom);
+classroomRouter.post("/assign-student", verifyToken, assignStudentToClassroom);
+classroomRouter.patch("/update", verifyToken, updateClassroom);
+classroomRouter.delete("/delete", verifyToken, deleteClassroom);
 
-export default classRoom;
+export default classroomRouter;

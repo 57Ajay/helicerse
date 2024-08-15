@@ -6,8 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var principle_controller_1 = require("../../controllers/principle.controller");
 var verifyAuth_middleware_1 = __importDefault(require("../../middlewares/verifyAuth.middleware"));
-var classRoom = (0, express_1.default)();
-classRoom.post("/create", verifyAuth_middleware_1.default, principle_controller_1.createClassroom);
-classRoom.post("/assign-student", verifyAuth_middleware_1.default, principle_controller_1.assignStudentToClassroom);
-exports.default = classRoom;
+var classroomRouter = (0, express_1.default)();
+classroomRouter.post("/create", verifyAuth_middleware_1.default, principle_controller_1.createClassroom);
+classroomRouter.post("/assign-student", verifyAuth_middleware_1.default, principle_controller_1.assignStudentToClassroom);
+classroomRouter.patch("/update", verifyAuth_middleware_1.default, principle_controller_1.updateClassroom);
+classroomRouter.delete("/delete", verifyAuth_middleware_1.default, principle_controller_1.deleteClassroom);
+exports.default = classroomRouter;
 //# sourceMappingURL=classroom.route.js.map

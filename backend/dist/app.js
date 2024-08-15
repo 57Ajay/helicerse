@@ -9,6 +9,7 @@ var cors_1 = __importDefault(require("cors"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var auth_route_1 = __importDefault(require("./routes/auth/auth.route"));
 var classroom_route_1 = __importDefault(require("./routes/classroom/classroom.route"));
+var user_route_1 = __importDefault(require("./routes/user/user.route"));
 var app = (0, express_1.default)();
 exports.app = app;
 app.use(body_parser_1.default.json());
@@ -20,4 +21,6 @@ app.get("/api", function (req, res) {
 app.use("/api/auth", auth_route_1.default);
 // ClassRoom router
 app.use("/api/classroom", classroom_route_1.default);
+// User router
+app.use("/api/user", user_route_1.default);
 //# sourceMappingURL=app.js.map

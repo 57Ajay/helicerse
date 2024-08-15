@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import authRouter from "./routes/auth/auth.route";
-import classRoom from "./routes/classroom/classroom.route";
+import classroomRouter from "./routes/classroom/classroom.route";
+import userRouter from "./routes/user/user.route";
 const app = express();
 
 
@@ -17,7 +18,10 @@ app.get("/api", (req, res)=>{
 app.use("/api/auth", authRouter);
 
 // ClassRoom router
-app.use("/api/classroom", classRoom);
+app.use("/api/classroom", classroomRouter);
+
+// User router
+app.use("/api/user", userRouter);
 
 export { app };
 

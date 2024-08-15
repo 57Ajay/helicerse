@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -39,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.assignStudentToClassroom = exports.createClassroom = void 0;
+exports.getAllUsers = exports.deleteClassroom = exports.deleteUser = exports.updateClassroom = exports.updateUser = exports.assignStudentToClassroom = exports.createClassroom = void 0;
 var classroom_model_1 = __importDefault(require("../models/classroom.model"));
 var asyncHandler_1 = __importDefault(require("../utils/asyncHandler"));
 var apiError_1 = __importDefault(require("../utils/apiError"));
@@ -82,8 +93,11 @@ exports.createClassroom = (0, asyncHandler_1.default)(function (req, res) { retu
                     }, 201))];
             case 3:
                 error_1 = _b.sent();
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
+                console.log(error_1.message);
+                throw new apiError_1.default("Something went wrong", 500);
+            case 4:
+                ;
+                return [2 /*return*/];
         }
     });
 }); });
@@ -171,8 +185,42 @@ exports.updateUser = (0, asyncHandler_1.default)(function (req, res) { return __
         }
     });
 }); });
+exports.updateClassroom = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var loggedInUser, classroomId, classroom, error_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                loggedInUser = req.user;
+                if (loggedInUser.role !== "Principal") {
+                    throw new apiError_1.default("You are not authorized to perform this action", 404);
+                }
+                ;
+                classroomId = req.body.classroomId;
+                if (!classroomId) {
+                    throw new apiError_1.default("All fields are required", 400);
+                }
+                ;
+                return [4 /*yield*/, classroom_model_1.default.findByIdAndUpdate(classroomId, __assign({}, req.body), { new: true })];
+            case 1:
+                classroom = _a.sent();
+                if (!classroom) {
+                    throw new apiError_1.default("Classroom not found", 404);
+                }
+                ;
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classroom updated successfully", {
+                        classroom: classroom
+                    }, 200))];
+            case 2:
+                error_4 = _a.sent();
+                console.log(error_4.message);
+                throw new apiError_1.default("Something went wrong", 500);
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 exports.deleteUser = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var loggedInUser, userId, user, error_4;
+    var loggedInUser, userId, user, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -197,12 +245,75 @@ exports.deleteUser = (0, asyncHandler_1.default)(function (req, res) { return __
                         user: user,
                     }, 200))];
             case 2:
-                error_4 = _a.sent();
-                console.log(error_4.message);
+                error_5 = _a.sent();
+                console.log(error_5.message);
                 throw new apiError_1.default("Something went wrong", 500);
             case 3:
                 ;
                 return [2 /*return*/];
+        }
+    });
+}); });
+exports.deleteClassroom = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var loggedInUser, classroomId, classroom, error_6;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                loggedInUser = req.user;
+                if (loggedInUser.role !== "Principal") {
+                    throw new apiError_1.default("You are not authorized to perform this action", 404);
+                }
+                ;
+                classroomId = req.body.classroomId;
+                if (!classroomId) {
+                    throw new apiError_1.default("All fields are required", 400);
+                }
+                ;
+                return [4 /*yield*/, classroom_model_1.default.findByIdAndDelete(classroomId)];
+            case 1:
+                classroom = _a.sent();
+                if (!classroom) {
+                    throw new apiError_1.default("Classroom not found", 404);
+                }
+                ;
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classroom deleted successfully", {
+                        classroom: classroom,
+                    }, 200))];
+            case 2:
+                error_6 = _a.sent();
+                console.log(error_6.message);
+                throw new apiError_1.default("Something went wrong", 500);
+            case 3:
+                ;
+                return [2 /*return*/];
+        }
+    });
+}); });
+exports.getAllUsers = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var loggedInUser, allUsers, error_7;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                loggedInUser = req.user;
+                if (loggedInUser.role !== "Principal") {
+                    throw new apiError_1.default("You are not authorized to perform this action", 403);
+                }
+                return [4 /*yield*/, user_model_1.default.find({
+                        role: { $in: ["Teacher", "Student"] }
+                    }).select('-password -refreshToken')];
+            case 1:
+                allUsers = _a.sent();
+                if (!allUsers.length) {
+                    return [2 /*return*/, res.status(200).json(new apiResponse_1.default("No users found", [], 200))];
+                }
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Users fetched successfully", allUsers, 200))];
+            case 2:
+                error_7 = _a.sent();
+                console.log(error_7.message);
+                throw new apiError_1.default("Something went wrong", 500);
+            case 3: return [2 /*return*/];
         }
     });
 }); });

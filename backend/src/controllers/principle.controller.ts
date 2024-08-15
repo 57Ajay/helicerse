@@ -108,7 +108,33 @@ export const updateUser = asyncHandler(async(req, res)=>{
     }
 });
 
-export const updateClassroom = asyncHandler(req)
+export const updateClassroom = asyncHandler(async(req, res)=>{
+    try {
+        const loggedInUser = req.user;
+        if (loggedInUser.role !== "Principal"){
+            throw new ApiError("You are not authorized to perform this action", 404);
+        }; 
+    
+        const { classroomId } = req.body;
+        if (!classroomId) {
+            throw new ApiError("All fields are required", 400)
+        };
+    
+        const classroom = await Classroom.findByIdAndUpdate(classroomId, { ...req.body }, { new: true });
+        if (!classroom) {
+            throw new ApiError("Classroom not found", 404);
+        };
+    
+        return res.status(200).json(
+            new ApiResponse("Classroom updated successfully", {
+                classroom
+            }, 200));
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500)
+    }
+});
+
 
 export const deleteUser = asyncHandler(async(req, res)=>{
     
@@ -136,4 +162,60 @@ export const deleteUser = asyncHandler(async(req, res)=>{
         console.log(error.message);
         throw new ApiError("Something went wrong", 500)
     };
+});
+
+
+export const deleteClassroom = asyncHandler(async(req, res)=>{
+    try {
+        const loggedInUser = req.user;
+        if (loggedInUser.role !== "Principal"){
+            throw new ApiError("You are not authorized to perform this action", 404);
+        }; 
+
+        const { classroomId } = req.body;
+        if (!classroomId) {
+            throw new ApiError("All fields are required", 400)
+        };
+
+        const classroom = await Classroom.findByIdAndDelete(classroomId);
+        if (!classroom) {
+            throw new ApiError("Classroom not found", 404);
+        };
+
+        return res.status(200).json(
+            new ApiResponse("Classroom deleted successfully", {
+                classroom,
+            }, 200));
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500)
+    };
+});
+
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+    
+        if (loggedInUser.role !== "Principal") {
+            throw new ApiError("You are not authorized to perform this action", 403);
+        }
+    
+        const allUsers = await User.find({ 
+            role: { $in: ["Teacher", "Student"] } 
+        }).select('-password -refreshToken');
+    
+        if (!allUsers.length) {
+            return res.status(200).json(
+                new ApiResponse("No users found", [], 200)
+            );
+        }
+    
+        return res.status(200).json(
+            new ApiResponse("Users fetched successfully", allUsers, 200)
+        );
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500);
+    }
 });
