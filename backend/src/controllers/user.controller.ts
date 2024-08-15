@@ -1,4 +1,4 @@
-import Classroom from "../models/classroom.model";
+
 import asyncHandler from "../utils/asyncHandler";
 import ApiError from "../utils/apiError";
 import ApiResponse from "../utils/apiResponse";
@@ -104,3 +104,26 @@ export const getAllUsers = asyncHandler(async (req, res) => {
     }
 });
 
+export const getUserById = asyncHandler(async(req, res)=>{
+    try {
+        const loggedInUser = req.user;
+        if (loggedInUser.role !== "Principal"){
+            throw new ApiError("You are not authorized to perform this action", 404);
+        };
+
+        const { userId } = req.params;
+        if (!userId) {
+            throw new ApiError("userId is required", 400)
+        };
+        const user = await User.findById(userId).select("-password -refreshToken");
+
+        return res.status(200).json(
+            new ApiResponse("User fetched successfully", {
+                user
+            }, 200)
+        );
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500)
+    }
+});

@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllUsers = exports.deleteUser = exports.updateUser = void 0;
+exports.getUserById = exports.getAllUsers = exports.deleteUser = exports.updateUser = void 0;
 var asyncHandler_1 = __importDefault(require("../utils/asyncHandler"));
 var apiError_1 = __importDefault(require("../utils/apiError"));
 var apiResponse_1 = __importDefault(require("../utils/apiResponse"));
@@ -147,6 +147,36 @@ exports.getAllUsers = (0, asyncHandler_1.default)(function (req, res) { return _
             case 2:
                 error_3 = _a.sent();
                 console.log(error_3.message);
+                throw new apiError_1.default("Something went wrong", 500);
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+exports.getUserById = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var loggedInUser, userId, user, error_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                loggedInUser = req.user;
+                if (loggedInUser.role !== "Principal") {
+                    throw new apiError_1.default("You are not authorized to perform this action", 404);
+                }
+                ;
+                userId = req.params.userId;
+                if (!userId) {
+                    throw new apiError_1.default("userId is required", 400);
+                }
+                ;
+                return [4 /*yield*/, user_model_1.default.findById(userId).select("-password -refreshToken")];
+            case 1:
+                user = _a.sent();
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("User fetched successfully", {
+                        user: user
+                    }, 200))];
+            case 2:
+                error_4 = _a.sent();
+                console.log(error_4.message);
                 throw new apiError_1.default("Something went wrong", 500);
             case 3: return [2 /*return*/];
         }

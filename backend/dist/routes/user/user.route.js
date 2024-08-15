@@ -10,5 +10,6 @@ var userRouter = (0, express_1.Router)();
 userRouter.patch("/update", verifyAuth_middleware_1.default, user_controller_1.updateUser);
 userRouter.delete("/delete", verifyAuth_middleware_1.default, user_controller_1.deleteUser);
 userRouter.get("/all", verifyAuth_middleware_1.default, user_controller_1.getAllUsers);
+userRouter.get("/:userId", verifyAuth_middleware_1.default, user_controller_1.getUserById);
 exports.default = userRouter;
 //# sourceMappingURL=user.route.js.map

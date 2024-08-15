@@ -3,8 +3,7 @@ import asyncHandler from "../utils/asyncHandler";
 import ApiError from "../utils/apiError";
 import ApiResponse from "../utils/apiResponse";
 import User from "../models/user.model";
-import bcrypt from 'bcrypt';
-import { IUser } from "../models/user.model";
+
 
 export const createClassroom = asyncHandler(async(req, res)=>{
    try {
@@ -18,8 +17,8 @@ export const createClassroom = asyncHandler(async(req, res)=>{
      if (loggedInUser.role !== "Principal"){
          throw new ApiError("You are not authorized to perform this action", 404);
      };
- 
-     const teacher = await User.findById(teacherId);
+
+     const teacher = await User.findById(teacherId).select("-password -refreshToken");
      if (!teacher || teacher.role !== "Teacher") {
          throw new ApiError("Teacher not found", 404);
      };
@@ -42,6 +41,63 @@ export const createClassroom = asyncHandler(async(req, res)=>{
     throw new ApiError("Something went wrong", 500)
    };
 });
+
+export const getAllClassrooms = asyncHandler(async(req, res)=>{
+    try {
+        const loggedInUser = req.user;
+        if (loggedInUser.role !== "Principal" && loggedInUser.role !== "Teacher"){
+            throw new ApiError("You are not authorized to perform this action", 404);
+        };
+
+        const classrooms = await Classroom.find().populate({
+            path: 'teacher',
+            select: 'email role _id '
+        }).populate({
+            path: "students",
+            select: " email role _id"
+        });
+
+        return res.status(200).json(
+            new ApiResponse("Classrooms fetched successfully", {
+                classrooms
+            }, 200)
+        );
+
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500)
+    }
+});
+
+export const getClassroomById = asyncHandler(async(req, res)=>{
+    try {
+        const loggedInUser = req.user;
+        if (loggedInUser.role !== "Principal" && loggedInUser.role !== "Teacher"){
+            throw new ApiError("You are not authorized to perform this action", 404);
+        };
+    
+        const { classroomId } = req.params;
+        if (!classroomId) {
+            throw new ApiError("classroomId is required", 400)
+        };
+        const classroom = await Classroom.findById(classroomId).populate({
+            path: 'teacher',
+            select: 'email role _id '
+        }).populate({
+            path: "students",
+            select: " email role _id"
+        });
+    
+        return res.status(200).json(
+            new ApiResponse("Classroom fetched successfully", {
+                classroom
+            }, 200)
+        );
+    } catch (error) {
+        console.log(error.message);
+        throw new ApiError("Something went wrong", 500)
+    }
+})
 
 export const assignStudentToClassroom = asyncHandler(async(req, res)=>{
    try {

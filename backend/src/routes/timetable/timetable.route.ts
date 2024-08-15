@@ -1,6 +1,6 @@
 import { Router } from "express";
 import verifyToken from "../../middlewares/verifyAuth.middleware";
-import { createTimetable, updateTimetable } from "../../controllers/teacher.controller";
+import { createTimetable, updateTimetable } from "../../controllers/timetable.controller";
 
 const timeTableRouter = Router();
 timeTableRouter.use(verifyToken);

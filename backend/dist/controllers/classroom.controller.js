@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteClassroom = exports.updateClassroom = exports.assignStudentToClassroom = exports.createClassroom = void 0;
+exports.deleteClassroom = exports.updateClassroom = exports.assignStudentToClassroom = exports.getClassroomById = exports.getAllClassrooms = exports.createClassroom = void 0;
 var classroom_model_1 = __importDefault(require("../models/classroom.model"));
 var asyncHandler_1 = __importDefault(require("../utils/asyncHandler"));
 var apiError_1 = __importDefault(require("../utils/apiError"));
@@ -72,7 +72,7 @@ exports.createClassroom = (0, asyncHandler_1.default)(function (req, res) { retu
                     throw new apiError_1.default("You are not authorized to perform this action", 404);
                 }
                 ;
-                return [4 /*yield*/, user_model_1.default.findById(teacherId)];
+                return [4 /*yield*/, user_model_1.default.findById(teacherId).select("-password -refreshToken")];
             case 1:
                 teacher = _b.sent();
                 if (!teacher || teacher.role !== "Teacher") {
@@ -101,8 +101,75 @@ exports.createClassroom = (0, asyncHandler_1.default)(function (req, res) { retu
         }
     });
 }); });
+exports.getAllClassrooms = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var loggedInUser, classrooms, error_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                loggedInUser = req.user;
+                if (loggedInUser.role !== "Principal" && loggedInUser.role !== "Teacher") {
+                    throw new apiError_1.default("You are not authorized to perform this action", 404);
+                }
+                ;
+                return [4 /*yield*/, classroom_model_1.default.find().populate({
+                        path: 'teacher',
+                        select: 'email role _id '
+                    }).populate({
+                        path: "students",
+                        select: " email role _id"
+                    })];
+            case 1:
+                classrooms = _a.sent();
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classrooms fetched successfully", {
+                        classrooms: classrooms
+                    }, 200))];
+            case 2:
+                error_2 = _a.sent();
+                console.log(error_2.message);
+                throw new apiError_1.default("Something went wrong", 500);
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+exports.getClassroomById = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var loggedInUser, classroomId, classroom, error_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                loggedInUser = req.user;
+                if (loggedInUser.role !== "Principal" && loggedInUser.role !== "Teacher") {
+                    throw new apiError_1.default("You are not authorized to perform this action", 404);
+                }
+                ;
+                classroomId = req.params.classroomId;
+                if (!classroomId) {
+                    throw new apiError_1.default("classroomId is required", 400);
+                }
+                ;
+                return [4 /*yield*/, classroom_model_1.default.findById(classroomId).populate({
+                        path: 'teacher',
+                        select: 'email role _id '
+                    }).populate({
+                        path: "students",
+                        select: " email role _id"
+                    })];
+            case 1:
+                classroom = _a.sent();
+                return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classroom fetched successfully", {
+                        classroom: classroom
+                    }, 200))];
+            case 2:
+                error_3 = _a.sent();
+                console.log(error_3.message);
+                throw new apiError_1.default("Something went wrong", 500);
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 exports.assignStudentToClassroom = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var loggedInUser, _a, classroomId, studentId_1, classRoom, student, duplicateStudent, error_2;
+    var loggedInUser, _a, classroomId, studentId_1, classRoom, student, duplicateStudent, error_4;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -144,15 +211,15 @@ exports.assignStudentToClassroom = (0, asyncHandler_1.default)(function (req, re
                         classRoom: classRoom
                     }, 201))];
             case 4:
-                error_2 = _b.sent();
-                console.log(error_2.message);
+                error_4 = _b.sent();
+                console.log(error_4.message);
                 throw new apiError_1.default("Something went wrong", 500);
             case 5: return [2 /*return*/];
         }
     });
 }); });
 exports.updateClassroom = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var loggedInUser, classroomId, classroom, error_3;
+    var loggedInUser, classroomId, classroom, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -184,15 +251,15 @@ exports.updateClassroom = (0, asyncHandler_1.default)(function (req, res) { retu
                         students: classroom.students
                     }, 200))];
             case 2:
-                error_3 = _a.sent();
-                console.log(error_3.message);
+                error_5 = _a.sent();
+                console.log(error_5.message);
                 throw new apiError_1.default("Something went wrong", 500);
             case 3: return [2 /*return*/];
         }
     });
 }); });
 exports.deleteClassroom = (0, asyncHandler_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var loggedInUser, classroomId, classroom, error_4;
+    var loggedInUser, classroomId, classroom, error_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -216,8 +283,8 @@ exports.deleteClassroom = (0, asyncHandler_1.default)(function (req, res) { retu
                 ;
                 return [2 /*return*/, res.status(200).json(new apiResponse_1.default("Classroom deleted successfully", null, 200))];
             case 2:
-                error_4 = _a.sent();
-                console.log(error_4.message);
+                error_6 = _a.sent();
+                console.log(error_6.message);
                 throw new apiError_1.default("Something went wrong", 500);
             case 3:
                 ;
